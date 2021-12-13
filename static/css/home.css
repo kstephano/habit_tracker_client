@@ -8,6 +8,11 @@
 body{
     font-family: "Roboto", "Arial" !important;
 }
+ 
+p{
+    margin-top: 10px !important;
+    text-align: center;
+}
 
 .grid-container{
     margin: 10px 20px 10px 10px;
@@ -21,6 +26,7 @@ body{
     /* width: 80%; */
     padding: 8px 0px 0px 0px;
     text-align: center;
+    background-color: rgba(255, 255, 255, 0.219) !important;
     border: 1px solid black;
 }
 

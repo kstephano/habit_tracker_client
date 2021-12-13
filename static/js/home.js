@@ -52,16 +52,16 @@ function displayHabits(){
 
         let frequency = habits[x].frequency
         const amountExpected = habits[x].amount.expected
-        habitFrequency = habitFrequencies(frequency, amountExpected)
+        habitFrequency = habitFrequencies(frequency, amountExpected)[0]
         habitContainer.appendChild(habitFrequency)
 
         const habitStatus = document.createElement("h6")
         const progress = Math.round((habits[x].amount.current/habits[x].amount.expected)*100)
-        habitStatus.textContent = `Current Progress: ${progress}%`
+        habitStatus.textContent = `Current Progress: ${progress}% (${habits[x].amount.current} time(s) in the last ${habitFrequencies(frequency, amountExpected)[1]})`
         habitContainer.appendChild(habitStatus)
 
         const habitButton = document.createElement("button")
-        habitButton.textContent = "Log Progress"
+        habitButton.textContent = "Log Progress (+1)"
         habitButton.setAttribute("class","btn btn-success")
         habitButton.setAttribute("name",x)
         habitButton.addEventListener("click", e=>{
@@ -95,7 +95,10 @@ function habitFrequencies(frequency, amountExpected){
         frequencyShown = "fortnight"
     } else if (frequency == 30){
         frequencyShown = "month"
-    } else{
+    } else if (frequency == 1){
+        frequencyShown = "day"
+    }
+    else{
         frequencyShown = frequency + " days"
     }
     // Set text content of habitFrequency html element
@@ -112,7 +115,7 @@ function habitFrequencies(frequency, amountExpected){
     else if(amountExpected==1){
         habitFrequency.textContent = `Frequency: Once every ${frequencyShown}`
     }
-    return(habitFrequency)
+    return[habitFrequency, frequencyShown]
 }
 
 function updateHabitStatus(e){

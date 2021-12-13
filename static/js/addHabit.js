@@ -30,10 +30,8 @@ function loadListeners(){
 habitForm.addEventListener("submit", e=>{
     e.preventDefault()
     if(e.target.new_habit_name.value==""){
-        console.log("existing habit chosen")
         newHabitName = e.target.existing_habit_name.value
     }else if(e.target.existing_habit_name.value==""){
-        console.log("new habit chosen")
         newHabitName = e.target.new_habit_name.value
     }else{
         console.log("BROKEN")
