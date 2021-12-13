@@ -1,19 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
 
+*{
+    box-sizing: border-box;
+    padding: 0;
+}
+
 body{
     font-family: "Roboto", "Arial" !important;
 }
 
 .grid-container{
-    margin: 10px 10px 10px 10px;
+    margin: 10px 20px 10px 10px;
     display: grid;
-    grid-row-gap: 5px;
-    grid-column-gap: 5px;
+    grid-row-gap: 10px;
+    grid-column-gap: 10px;
     grid-template-columns: 50% 50%;
 }
 
 .grid-item{
-    padding: 8px 0px 8px 0px;
+    /* width: 80%; */
+    padding: 8px 0px 0px 0px;
     text-align: center;
     border: 1px solid black;
+}
+
+@media only screen and (max-width: 619px) {
+    .grid-container{
+        margin: 10px 10px 10px 10px;
+        grid-template-columns: 100%;
+    }
 }

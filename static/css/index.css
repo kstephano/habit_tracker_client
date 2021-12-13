@@ -7,7 +7,7 @@ body{
 
 .login-screen{
     display:flex;
-    width: 70%;
+    width: 100%;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -15,22 +15,27 @@ body{
 
 .container{
     display:flex;
+    width: 150%;
     height: auto;
     justify-content: center;
     align-items: center;
 }
 
 #login-form, #register-form{
-    width: 70%;
+    width: 150%;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     display:none;
 }
 
+.form-control{
+    width: 100% !important;
+}
 #back-btn{
     display: none;
 }
+
 .btn{
     margin-top: 10px;
     width:100px;
@@ -44,16 +49,16 @@ h2{
 
 html {
     height:100%;
-  }
-  
-  body {
+}
+
+body {
     margin:0;
-  }
+}
   
 /* ANIMATED BACKGROUND */
 .bg {
-animation: slide 5s ease-in-out infinite alternate;
-background-image: linear-gradient(-43deg, rgb(120, 143, 248) 50%, rgb(104, 192, 250) 50%);
+animation: slide 5.1s ease-in-out infinite alternate;
+background-image: linear-gradient(-43deg, rgb(133, 154, 250) 50%, rgb(104, 192, 250) 50%);
 position:fixed;
 top:0;
 right:-50%;
@@ -65,11 +70,11 @@ z-index:-1;
 
 .bg2 {
 animation-direction:alternate-reverse;
-animation-duration:10s;
+animation-duration:10.3s;
 }
 
 .bg3 {
-animation-duration:7s;
+animation-duration:7.2s;
 }
 
 .content {

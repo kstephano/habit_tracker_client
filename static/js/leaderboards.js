@@ -1,5 +1,5 @@
-document.addEventListener("DOMContentLoaded", loadListeners);
+document.addEventListener("DOMContentLoaded", getData);
 
-function loadListeners(){
+function getData(){
     console.log("Here")
 }

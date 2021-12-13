@@ -14,25 +14,24 @@ const habits=[
     {
     habitName: "Water",
     frequency: 1,
-    amount: [{ expected: 3 }, { current: 0 }],
-    streak: [{ top: 5 }, { current: 3 }],
+    amount: { expected: 3 ,  current: 1 },
+    streak: { top: 5 ,  current: 3 },
     lastLog: "2021-12-11T11:31:21.988Z"
     },
     {
     habitName: "Brushing Teeth",
-    frequency: 14,
-    amount: [{ expected: 7 }, { current: 1 }],
-    streak: [{ top: 101 }, { current: 70 }],
+    frequency: 7,
+    amount: { expected: 14 , current: 9 },
+    streak: { top: 101 ,  current: 70 },
     lastLog: "2021-12-11T11:31:21.988Z"
     },
     {
     habitName: "Dog Walking",
     frequency: 7,
-    amount: [{ expected: 1 }, { current: 0 }],
-    streak: [{ top: 76 }, { current: 76 }],
+    amount: { expected: 1 , current: 1 },
+    streak: { top: 76 ,  current: 76 },
     lastLog: "2021-12-11T11:31:21.988Z"
     },
-
 ]
 
 function displayHabits(){
@@ -45,30 +44,44 @@ function displayHabits(){
         habitContainer.appendChild(habitName)
 
         const habitTopStreak = document.createElement("h6")
-        habitTopStreak.textContent = `Top Streak: ${habits[x].streak[0].top}`
+        habitTopStreak.textContent = `Top Streak: ${habits[x].streak.top}`
         const habitCurrentStreak = document.createElement("h6")
-        habitCurrentStreak.textContent = `Current Streak: ${habits[x].streak[1].current}`
+        habitCurrentStreak.textContent = `Current Streak: ${habits[x].streak.current}`
         habitContainer.appendChild(habitTopStreak)
         habitContainer.appendChild(habitCurrentStreak)
 
         let frequency = habits[x].frequency
-        const amountExpected = habits[x].amount[0].expected
+        const amountExpected = habits[x].amount.expected
         habitFrequency = habitFrequencies(frequency, amountExpected)
         habitContainer.appendChild(habitFrequency)
 
         const habitStatus = document.createElement("h6")
-        habitStatus.textContent = `Times Completed: ${habits[x].amount[1].current}`
+        const progress = Math.round((habits[x].amount.current/habits[x].amount.expected)*100)
+        habitStatus.textContent = `Current Progress: ${progress}%`
         habitContainer.appendChild(habitStatus)
 
         const habitButton = document.createElement("button")
-        habitButton.textContent = "Completed"
+        habitButton.textContent = "Log Progress"
         habitButton.setAttribute("class","btn btn-success")
         habitButton.setAttribute("name",x)
         habitButton.addEventListener("click", e=>{
             updateHabitStatus(e)
         })
-
         habitContainer.appendChild(habitButton)
+
+        const progressBar = document.createElement("div");
+        progressBar.textContent = ".";
+        progressBar.style.color = "#32DD53";
+        progressBar.style.textAlign = "left";
+        progressBar.style.backgroundColor = "#32DD53DD";
+        progressBar.style.marginTop = "10px";
+        progressBar.style.width = progress+"%";
+        if (progress==100){
+            progressBar.textContent = ":)";
+            progressBar.style.textAlign = "right";
+            progressBar.style.color = "#000000";
+        }
+        habitContainer.appendChild(progressBar)
         habitGrid.appendChild(habitContainer)
     }
 }
