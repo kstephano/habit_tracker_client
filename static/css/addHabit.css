@@ -1,3 +1,8 @@
+h5{
+    text-align: center;
+    padding: 10px 10px 10px 10px;
+}
+
 .navbar-collapse{
     display: flex;
     align-items: flex-end !important;
@@ -17,8 +22,22 @@
     width: 50%;
 }
 
+.button-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
 .nav-item{
     margin-left: 18px;
+}
+
+.button-container{
+    margin-bottom: 10px;
+}
+
+#own-habit, #default-habits{
+    display:none;
 }
 
 @media only screen and (max-width: 991px) {
@@ -33,7 +52,7 @@
         flex-direction: column;
     }
 
-    #frequency, #days{
+    #amount, #days{
         width: 100%;
     }
 }
