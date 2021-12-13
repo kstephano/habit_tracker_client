@@ -14,31 +14,31 @@
     <section class="container">
         <div class="login-screen">
             <h2>Welcome to Habit Tracker</h2>
-            <button id="login-btn" class="btn btn-light">Log In</button>
+            <button id="open-login" class="btn btn-light">Log In</button>
                 <form id="login-form">
                     <!-- <input type="text" name="email" placeholder="Email">
                     <input type="password" name="password" placeholder="Password"> -->
                         <div class="mb-3">
                           <label class="form-label">Email address</label>
-                          <input required type="email" class="form-control" aria-describedby="emailHelp">
+                          <input required type="email" name="email" class="form-control" aria-describedby="emailHelp">
                         </div>
                         <div class="mb-3">
                           <label for="exampleInputPassword1" class="form-label">Password</label>
-                          <input required type="password" class="form-control">
+                          <input required type="password" name="password" class="form-control">
                         </div>
                         <button type="submit" class="btn btn-secondary">Login</button>
                 </form>
-            <button id="register-btn" class="btn btn-light">Register</button>
+            <button id="open-register" class="btn btn-light">Register</button>
             <form id="register-form">
                 <!-- <input type="text" name="email" placeholder="Email">
                 <input type="password" name="password" placeholder="Password"> -->
                     <div class="mb-3">
                       <label class="form-label">Email address</label>
-                      <input required type="email" class="form-control" aria-describedby="emailHelp">
+                      <input required type="email" name="email" class="form-control" aria-describedby="emailHelp">
                     </div>
                     <div class="mb-3">
                       <label for="exampleInputPassword1" class="form-label">Password</label>
-                      <input required id="register-password" type="password" class="form-control">
+                      <input required id="register-password" name="password" type="password" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label for="exampleInputPassword1" class="form-label">Confirm Password</label>
