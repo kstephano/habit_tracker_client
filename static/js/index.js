@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", loginListeners);
 
+// Event listeners for login page, to display/hide forms
 function loginListeners(){
     loginBtn = document.querySelector("#login-btn")
     registerBtn = document.querySelector("#register-btn")
@@ -7,7 +8,6 @@ function loginListeners(){
 
     loginBtn.addEventListener("click", e=>{
         showForm("#login-form")})
-    
     registerBtn.addEventListener("click", e=>{
         showForm("#register-form")})
 
@@ -26,3 +26,19 @@ function loginListeners(){
         backBtn.style.display = "none";
     })
 }
+
+
+// Confirm password when registering a user
+let password = document.querySelector("#register-password")
+let confirmPassword = document.querySelector("#confirm-password");
+
+function validatePassword(){
+  if(password.value != confirmPassword.value) {
+    confirmPassword.setCustomValidity("Passwords Don't Match");
+  } else {
+    confirmPassword.setCustomValidity('');
+  }
+}
+
+password.onchange = validatePassword;
+confirmPassword.onkeyup = validatePassword;
