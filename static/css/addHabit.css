@@ -1,0 +1,50 @@
+.navbar-collapse{
+    display: flex;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+}
+
+.flex-container{
+    display:flex;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-container{
+    display:flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.nav-item{
+    margin-left: 18px;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-nav{
+        flex-direction: row !important;
+    }
+}
+
+@media only screen and (max-width: 775px) {
+    .input-group{
+        display: flex;
+        flex-direction: column;
+    }
+
+    #frequency, #days{
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 583px) {
+    .nav-link span{
+        color: red !important;
+        display: none;
+    }
+
+    .nav-item{
+        margin-left: 25px;
+    }
+}

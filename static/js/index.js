@@ -73,7 +73,7 @@ function submitLogin(e, path){
     // post to the '/blogs' URL
     fetch(`http://localhost:3000/${path}`, options)
         .then((r) => r.json())
+        .then(window.location.href = "home.html")
         .catch(console.warn);
     // location.reload();
 }
-
