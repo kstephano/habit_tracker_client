@@ -1,12 +1,12 @@
-h5{
-    text-align: center;
-    padding: 10px 10px 10px 10px;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+
+body{
+    font-family: "Roboto", "Arial" !important;
 }
 
-.navbar-collapse{
-    display: flex;
-    align-items: flex-end !important;
-    justify-content: flex-end !important;
+h4{
+    text-align: center;
+    padding: 10px 10px 10px 10px;
 }
 
 .flex-container{
@@ -28,22 +28,12 @@ h5{
     justify-content: space-evenly;
 }
 
-.nav-item{
-    margin-left: 18px;
-}
-
 .button-container{
     margin-bottom: 10px;
 }
 
 #own-habit, #default-habits{
-    display:none;
-}
-
-@media only screen and (max-width: 991px) {
-    .navbar-nav{
-        flex-direction: row !important;
-    }
+    display: none;
 }
 
 @media only screen and (max-width: 775px) {
@@ -54,16 +44,5 @@ h5{
 
     #amount, #days{
         width: 100%;
-    }
-}
-
-@media only screen and (max-width: 583px) {
-    .nav-link span{
-        color: red !important;
-        display: none;
-    }
-
-    .nav-item{
-        margin-left: 25px;
     }
 }

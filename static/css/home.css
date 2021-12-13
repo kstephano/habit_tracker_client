@@ -1,7 +1,7 @@
-@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css");
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
 
-.nav-item{
-    margin-left: 18px;
+body{
+    font-family: "Roboto", "Arial" !important;
 }
 
 .grid-container{
@@ -9,33 +9,11 @@
     display: grid;
     grid-row-gap: 5px;
     grid-column-gap: 5px;
-    grid-template-columns: auto auto;
+    grid-template-columns: 50% 50%;
 }
 
 .grid-item{
+    padding: 8px 0px 8px 0px;
     text-align: center;
     border: 1px solid black;
-}
-
-@media only screen and (max-width: 991px) {
-    .navbar-nav{
-        flex-direction: row !important;
-    }
-}
-
-@media only screen and (max-width: 991px) {
-    .navbar-nav{
-        flex-direction: row !important;
-    }
-}
-
-@media only screen and (max-width: 583px) {
-    .nav-link span{
-        color: red !important;
-        display: none;
-    }
-
-    .nav-item{
-        margin-left: 25px;
-    }
 }

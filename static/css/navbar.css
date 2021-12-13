@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+
+body{
+    font-family: "Roboto", "Arial" !important;
+}
+
+.navbar-collapse{
+    display: flex;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+}
+
+.nav-item{
+    margin-left: 18px;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-nav{
+        flex-direction: row !important;
+    }
+}
+
+@media only screen and (max-width: 619px) {
+    .nav-link span{
+        color: red !important;
+        display: none;
+    }
+
+    .nav-item{
+        margin-left: 25px;
+    }
+}
+
