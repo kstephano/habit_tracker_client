@@ -77,3 +77,9 @@ function submitLogin(e, path){
         .catch(console.warn);
     // location.reload();
 }
+
+module.exports = {
+    loginListeners,
+    validatePassword,
+    submitLogin
+}

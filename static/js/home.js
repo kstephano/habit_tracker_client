@@ -179,3 +179,12 @@ function checkLeaderboard(element){
     // get leaderboard/streak data from backend and display top 5 users on this card
 }
 
+module.exports = {
+    displayHabits,
+    createHabitCards,
+    habitFrequencies,
+    updateHabitStatus,
+    makeButtons,
+    checkLeaderboard
+}
+

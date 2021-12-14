@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "coverage": "jest --coverage --silent"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,9 @@
   },
   "homepage": "https://github.com/kstephano/habit_tracker_client#readme",
   "dependencies": {
-    "jest": "^27.4.4"
+    "coverage": "^0.4.1",
+    "fs": "^0.0.1-security",
+    "jest": "^27.4.5",
+    "path": "^0.12.7"
   }
 }

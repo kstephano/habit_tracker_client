@@ -2,8 +2,12 @@
  * @jest-environment jsdom
  */
 
-describe("home.js tests", ()=>{
-    test("grid container exists", ()=>{
-        expect(document.querySelector(".grid-container")).toBeTruthy()
-    })
-})
+//  const fs = require("fs");
+//  const path = require("path");
+//  const html = fs.readFileSync(path.resolve(__dirname, "../home.html"), "utf8");
+
+// describe("home.js tests", ()=>{
+//     test("grid container exists", ()=>{
+//         expect(document.querySelector(".grid-container")).toBeTruthy()
+//     })
+// })
