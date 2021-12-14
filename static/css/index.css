@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+
+body{
+    font-family: "Roboto", "Arial" !important;
+    font-weight: bold;
+}
+
+.login-screen{
+    display:flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.container{
+    display:flex;
+    width: 150%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+#login-form, #register-form{
+    width: 150%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    display:none;
+}
+
+.form-control{
+    width: 100% !important;
+}
+#back-btn{
+    display: none;
+}
+
+.btn{
+    margin-top: 10px;
+    width:100px;
+    text-align: center;
+}
+
+h2{
+    text-align: center;
+    margin-bottom: 15px !important;
+}
+
+html {
+    height:100%;
+}
+
+body {
+    margin:0;
+}
+  
+/* ANIMATED BACKGROUND */
+.bg {
+animation: slide 5.1s ease-in-out infinite alternate;
+background-image: linear-gradient(-43deg, rgb(133, 154, 250) 50%, rgb(104, 192, 250) 50%);
+position:fixed;
+top:0;
+right:-50%;
+bottom:0;
+left:-50%;
+opacity:.5;
+z-index:-1;
+}
+
+.bg2 {
+animation-direction:alternate-reverse;
+animation-duration:10.3s;
+}
+
+.bg3 {
+animation-duration:7.2s;
+}
+
+.content {
+background-color:rgba(255, 255, 255, 0.205);
+left:50%;
+padding:10vmin;
+position:fixed;
+text-align:center;
+top:50%;
+transform:translate(-50%, -50%);
+}
+
+@keyframes slide {
+0% {
+    transform:translateX(-25%);
+}
+100% {
+    transform:translateX(25%);
+}
+}

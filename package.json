@@ -1,0 +1,26 @@
+{
+  "name": "habit_tracker_client",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000h\u0000a\u0000b\u0000i\u0000t\u0000_\u0000t\u0000r\u0000a\u0000c\u0000k\u0000e\u0000r\u0000_\u0000c\u0000l\u0000i\u0000e\u0000n\u0000t\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kstephano/habit_tracker_client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kstephano/habit_tracker_client/issues"
+  },
+  "homepage": "https://github.com/kstephano/habit_tracker_client#readme",
+  "dependencies": {
+    "jest": "^27.4.4"
+  }
+}

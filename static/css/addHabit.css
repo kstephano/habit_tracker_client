@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+
+body{
+    font-family: "Roboto", "Arial" !important;
+}
+
+h4{
+    text-align: center;
+    padding: 10px 10px 10px 10px;
+}
+
+.flex-container{
+    display:flex;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-container{
+    display:flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.button-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.button-container{
+    margin-bottom: 10px;
+}
+
+#own-habit, #default-habits{
+    display: none;
+}
+
+#create-own-habit, #default-habit-selection{
+    height: 42px;
+}
+
+@media only screen and (max-width: 775px) {
+    .input-group{
+        display: flex;
+        flex-direction: column;
+    }
+
+    #amount, #days{
+        width: 100%;
+    }
+}
