@@ -3,7 +3,9 @@ document.addEventListener("DOMContentLoaded", displayHabits);
 // async function loadHabits(){
 //     // get all habits
 //     try{
-//         let response = await fetch(`http://localhost:3000/habits`);
+//         // const email = localStorage.getItem("userEmail")
+//         const email = "initialUser@email.com"
+//         let response = await fetch(`http://localhost:3000/:${email}`);
 //         response = await response.json();
 //         displayHabits(response)
 //     }catch (err) {
@@ -38,7 +40,7 @@ const habits=[
     },
 ]
 
-function displayHabits(){
+function displayHabits(habitsList){
     const habitGrid = document.querySelector(".grid-container")
     for(let x in habits){
         const habitContainer = document.createElement("div")
@@ -55,18 +57,22 @@ function displayHabits(){
 
 function createHabitCards(habit){
         const habitTitle = document.createElement("h3")
+        habitTitle.setAttribute("id","habitTitleTag")
         habitTitle.textContent = habit.habitName
 
         const habitTopStreak = document.createElement("h6")
         habitTopStreak.textContent = `Top Streak: ${habit.streak.top}`
+        habitTopStreak.setAttribute("id","habitTopStreakTag")
         const habitCurrentStreak = document.createElement("h6")
         habitCurrentStreak.textContent = `Current Streak: ${habit.streak.current}`
+        habitCurrentStreak.setAttribute("id","habitCurrentStreakTag")
 
         let frequency = habit.frequency
         const amountExpected = habit.amount.expected
         habitFrequency = habitFrequencies(frequency, amountExpected)[0]
 
         const habitStatus = document.createElement("h6")
+        
         const progress = Math.round((habit.amount.current/habit.amount.expected)*100)
         habitStatus.textContent = `Current Progress: ${progress}% (${habit.amount.current} time(s) in the last ${habitFrequencies(frequency, amountExpected)[1]})`
 
@@ -142,8 +148,11 @@ function makeButtons(x){
         buttonContainer.appendChild(habitButton)
 
         const leaderboardBtn = document.createElement("button")
-        leaderboardBtn.textContent = "Leaderboards"
+        leaderboardBtn.textContent = "Leaderboards "
         leaderboardBtn.setAttribute("class","btn btn-warning")
+        const ldbIcon = document.createElement("i")
+        ldbIcon.setAttribute("class", "bi bi-bar-chart")
+        leaderboardBtn.appendChild(ldbIcon)
         leaderboardBtn.setAttribute("name",x)
         if(defaultHabits.includes(habits[x].habitName.toLowerCase())){
             leaderboardBtn.disabled = false;
