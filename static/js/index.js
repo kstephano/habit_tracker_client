@@ -50,20 +50,20 @@ function validatePassword(){
 loginForm.addEventListener("submit", e=>{
     e.preventDefault()
     const formData = {
-        userEmail: e.target.email.value,
+        email: e.target.email.value,
         password: e.target.password.value
     }
-    requestLogin(formData)
+    requestLogin(JSON.stringify(formData))
 })
 
 registerForm.addEventListener("submit", e=>{
     e.preventDefault()
     const formData = {
-        userEmail: e.target.email.value,
+        email: e.target.email.value,
         userName: e.target.username.value,
         password: e.target.password.value
     }
-    requestRegistration(formData)
+    requestRegistration(JSON.stringify(formData))
 })
 
 async function requestLogin(data){
@@ -71,15 +71,17 @@ async function requestLogin(data){
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: data
         }
-        console.log(options.body)
+        // console.log(options.body)
         const r = await fetch(`http://localhost:3000/auth/login`, options)
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err); }
-        login(fetchData);
+        localStorage.setItem('accessToken', fetchData.accessToken)
+        localStorage.setItem('refreshTokens', fetchData.refreshTokens)
+        login(data);
     } catch (err) {
-        console.warn(`Error: ${err}`);
+        console.warn(err);
     }
 }
 
@@ -88,24 +90,43 @@ async function requestRegistration(data) {
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: data
         }
         const r = await fetch(`http://localhost:3000/auth/register`, options)
-        console.log(data)
-        console.log(await r.json())
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err) }
-        requestLogin(fetchData);
+        requestLogin(options.body);
     } catch (err) {
         console.warn(err);
     }
 }
 
-function login(data){
-    localStorage.setItem('userName', data.userName);
-    localStorage.setItem('userEmail', data.userEmail);
-    window.location.href = './home.html'
+async function login(data){
+    data = JSON.parse(data)
+    const email = data.email.replace(/\./g, '%2E').replace(/\@/g, '%40')
+    try {
+        const response = await fetch(`http://localhost:3000/users/${email}`)
+        const data = await response.json()
+        localStorage.setItem('userName', data.userName)
+        localStorage.setItem('userEmail', email);
+        window.location.href = './home.html'
+    } catch (err) {
+        console.warn(err)
+    }
+    // fetchUsername(email)
+    // localStorage.setItem('userEmail', email);
+    // window.location.href = './home.html'
 }
+
+// async function fetchUsername(email) {
+//     try {
+//         const response = await fetch(`http://localhost:3000/users/${email}`)
+//         const data = await response.json()
+//         localStorage.setItem('userName', data.userName)
+//     } catch (err) {
+//         console.warn(err)
+//     }
+// }
 
 module.exports = {
     loginListeners,

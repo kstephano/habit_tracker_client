@@ -53,16 +53,27 @@
                     <option value="shower">Shower</option>
                     <option value="study">Study</option>
                     <option value="read">Read</option>
+                    <option value="run">Run</option>
+                    <option value="walk">Walk</option>
                 </select>
             </div>
 
             <div id="own-habit" class="mb-3">
                 <input id="create-own-habit" type="text" name="new_habit_name" class="form-control mb-3" placeholder="Habit Name">
             </div>
-
+            <label class="form-label">Units:</label><br>
+            <div class="unit-container">
+                <select id="units" required name="units" class="form-select form-control-lg mb-3">
+                    <option selected value="times">Times</option>
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="kilometres">Kilometres</option>
+                    <option value="miles">Miles</option>
+                </select>
+            </div><br>
             <label class="form-label">How Often/How Many:</label>
             <div class="input-group mb-3">
-                <input id="amount" name="amount" type="number" min="0" class="form-control mb-3" placeholder="Number">
+                <input required id="amount" name="amount" type="number" min="0" class="form-control mb-3" placeholder="Number">
                 <span class="input-group-text mb-3">Every</span>
                 <select id="days" required name="frequency" class="form-select form-control-lg mb-3">
                     <option selected value="1">Day</option>
