@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", loadHabits);
+document.addEventListener("DOMContentLoaded", displayHabits);
 
 async function loadHabits(){
     // get all habits
@@ -11,62 +11,23 @@ async function loadHabits(){
                         "Authorization": accessToken }
         }
         let response = await fetch(`http://localhost:3000/habits/${email}`, options);
-        response = await response.json();
-        console.log(response)
-        displayHabits(response)
+        habits = await response.json();
+        return habits
     }catch (err) {
     console.log(err);
     }
 }
 
-// fetch default habit names also?
-const defaultHabits = ["drink water","walk the dog","eat fruit","shower","study","read","run","walk"]
-
-// const habits=[
-//     {
-//         id: 0,
-//         userEmail: "initialUser@email.com",
-//         userName: "Initial User",
-//         habitName: "Water",
-//         frequency: 1,
-//         unit: "cups",
-//         expectedAmount: 3,
-//         currentAmount: 0,
-//         topStreak: 5,
-//         currentStreak: 3,
-//         lastLog: "2021-12-11T11:31:21.988Z"
-//     },
-//     {
-//         id: 1,
-//         userEmail: "initialUser@email.com",
-//         userName: "Initial User",
-//         habitName: "Run",
-//         frequency: 7,
-//         unit: "kilometres",
-//         expectedAmount: 10,
-//         currentAmount: 3,
-//         topStreak: 5,
-//         currentStreak: 3,
-//         lastLog: "2021-12-11T11:31:21.988Z"
-//     },
-//     {
-//         id: 2,
-//         userEmail: "initialUser@email.com",
-//         userName: "Initial User",
-//         habitName: "Read",
-//         frequency: 1,
-//         unit: "minutes",
-//         expectedAmount: 30,
-//         currentAmount: 0,
-//         topStreak: 10,
-//         currentStreak: 2,
-//         lastLog: "2021-12-11T11:31:21.988Z"
-//     }
-// ]
-
-function displayHabits(habits){
+async function displayHabits(){
+    const habits = await loadHabits()
     console.log(habits)
     const habitGrid = document.querySelector(".grid-container")
+    if(habits.length == 0){
+        const noHabitsMessage = document.createElement("h6")
+        noHabitsMessage.textContent = "No habits to display. Click 'Add Habits' above to create one"
+        noHabitsMessage.style.marginTop = "20px"
+        document.querySelector("#dashboard-message").appendChild(noHabitsMessage)
+    }
     for(let x in habits){
         // console.log(habits[x])
         const habitContainer = document.createElement("div")
@@ -110,7 +71,7 @@ function createHabitCards(habit){
         progressBar.style.textAlign = "left";
         progressBar.style.backgroundColor = "#32DD53DD";
         progressBar.style.marginTop = "10px";
-        // const progress = createHabitCards(habits[x])[5]
+
         progressBar.style.width =progress+"%";
         if (progress==100){
             progressBar.textContent = ":)";
@@ -118,7 +79,7 @@ function createHabitCards(habit){
             progressBar.style.color = "#000000";
         }
 
-        return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar]
+        return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar, progress]
 }
 
 function habitFrequencies(frequency, amountExpected, units){
@@ -165,21 +126,23 @@ async function updateHabitStatus(e, habit){
         userEmail: habit.userEmail,
         currentAmount: newAmount
     }
+    const accessToken = localStorage.getItem("accessToken")
     const options = {
         method: 'PUT',
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+        "Authorization": accessToken },
         body: JSON.stringify(updateData)
     }
     try{
-        const response = await fetch(`http://localhost:3000/habits/${habit.userEmail}/${habit.id}`, options)
+        const response = await fetch(`http://localhost:3000/habits/${habit.id}`, options)
         const r = await response.json()
+        location.reload()
     } catch (err) {
         console.warn(err)
     }
 }
 
 function makeButtons(habit, x){
-        console.log(habit)
         const buttonContainer = document.createElement("div")
         buttonContainer.style.display = "flex";
         buttonContainer.style.justifyContent = "space-evenly";
@@ -194,6 +157,9 @@ function makeButtons(habit, x){
         habitButton.setAttribute("type","submit")
         habitButton.setAttribute("name",x)
         habitButton.style.height="42px";
+        if(createHabitCards(habit)[6]>=100){
+            habitButton.disabled = true
+        }
         updateContainer.appendChild(habitButton)
 
         const logInput = document.createElement("input");
@@ -201,6 +167,8 @@ function makeButtons(habit, x){
         logInput.setAttribute("class","form-control mb-3")
         logInput.setAttribute("name","number")
         logInput.setAttribute("min","0")
+        const maxInput = habit.expectedAmount - habit.currentAmount
+        logInput.setAttribute("max",maxInput.toString())
         logInput.setAttribute("placeholder",habit.unit.toString())
         logInput.required = true;
         // logInput.setAttribute("max",habit.expectedAmount.toString())
@@ -221,21 +189,103 @@ function makeButtons(habit, x){
         leaderboardBtn.appendChild(ldbIcon)
         leaderboardBtn.setAttribute("name",x)
         leaderboardBtn.style.width = "45%"
+        const defaultHabits = ["drink water","walk the dog","eat fruit/veg","shower","study","read","run","walk"]
         if(defaultHabits.includes(habits[x].habitName.toLowerCase())){
             leaderboardBtn.disabled = false;
         }else{
             leaderboardBtn.disabled = true;
         }
         leaderboardBtn.addEventListener("click", e=>{
-            checkLeaderboard(e)
+            checkLeaderboard(e, habits[x].habitName, habits[x].frequency, habits[x].expectedAmount, habits[x].unit)
         })
         leaderboardBtn.style.height="42px";
         buttonContainer.appendChild(leaderboardBtn)
 
+        const deleteBtn = document.createElement("button")
+        deleteBtn.setAttribute("class","btn btn-danger")
+        const deleteIcon = document.createElement("i")
+        deleteIcon.setAttribute("class", "bi bi-trash")
+        deleteBtn.appendChild(deleteIcon)
+        deleteBtn.setAttribute("name",x)
+        deleteBtn.style.width = "10%"
+        deleteIcon.style.pointerEvents= "none";
+        deleteBtn.style.height = "42px"
+        deleteBtn.addEventListener("click", e=>{
+            deleteHabit(e, habits[x])
+        })
+        buttonContainer.appendChild(deleteBtn)
+
         return(buttonContainer)
 }
 
-function checkLeaderboard(element){
+async function checkLeaderboard(element, habitName, frequency, expectedAmount, unit){
+    element.preventDefault()
+    const habitContainer = document.getElementById(`${element.target.name}`)
+    habitContainer.innerHTML = "";
+    const closeBtn = document.createElement("button")
+    closeBtn.setAttribute("class","btn-close")
+    closeBtn.addEventListener("click", e=>{
+        habitContainer.innerHTML = "";
+        for(let x = 0 ; x<5 ; x++){
+            habitContainer.appendChild(createHabitCards(habits[element.target.name])[x])
+        }
+        habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name))
+        habitContainer.appendChild(createHabitCards(habits[element.target.name])[5])
+        closeBtn.innerHTML = "";
+    })
+    habitContainer.appendChild(closeBtn)
+    habitContainer.appendChild(habitFrequencies(frequency, expectedAmount, unit)[0])
+    habitContainer.appendChild(createHabitCards(habits[element.target.name])[0])
+
+    try{
+        const email = localStorage.getItem("userEmail")
+        const accessToken = localStorage.getItem("accessToken")
+        const options = {
+            method: 'GET',
+            headers: { "Content-Type": "application/json",
+                        "Authorization": accessToken }}
+        const r = await fetch(`http://localhost:3000/habits/leaderboard/${habitName}`, options)
+        const leaders = await r.json()
+        const filteredLeaders = leaders.filter(leader => leader.frequency == frequency && leader.unit == unit && leader.expectedAmount == expectedAmount)
+        const leaderboard = createLeaderboardTable(filteredLeaders)
+        habitContainer.appendChild(leaderboard)
+        } catch (err) {
+            console.warn(err)
+        }
+}
+
+function createLeaderboardTable (data) {
+    const leaderboardTable = document.createElement('table')
+    const leaderboardHeaders = document.createElement('tr')
+    const headers = ['Rank','Username','Top Streak']
+    for (let x = 0; x < headers.length; x++) {
+        const heading = document.createElement('td')
+        const headingText = document.createTextNode(`${headers[x]}`)
+        heading.appendChild(headingText)
+        leaderboardHeaders.appendChild(heading)
+    }
+    leaderboardTable.appendChild(leaderboardHeaders)
+    for (let x = 0; x < data.length; x++) {
+        const leaderRow = document.createElement('tr')
+        const rank = document.createElement('td')
+        const rankText = document.createTextNode(`${x+1}`)
+        rank.appendChild(rankText)
+        leaderRow.appendChild(rank)
+        const username = document.createElement('td')
+        const usernameText = document.createTextNode(`${data[x].userName}`)
+        username.appendChild(usernameText)
+        leaderRow.appendChild(username)
+        const streak = document.createElement('td')
+        const streakText = document.createTextNode(`${data[x].topStreak}`)
+        streak.appendChild(streakText)
+        leaderRow.appendChild(streak)
+        leaderboardTable.appendChild(leaderRow)
+    }
+    leaderboardTable.setAttribute('class', 'table')
+    return leaderboardTable
+}
+
+async function deleteHabit(element, habit){
     element.preventDefault()
     const habitContainer = document.getElementById(`${element.target.name}`)
     habitContainer.innerHTML = "";
@@ -252,16 +302,48 @@ function checkLeaderboard(element){
     })
     habitContainer.appendChild(closeBtn)
     habitContainer.appendChild(createHabitCards(habits[element.target.name])[0])
-
-    // get leaderboard/streak data from backend and display top 5 users on this card
+    
+    const deleteText = document.createElement("h6")
+    deleteText.style.margin = "10px 0px 10px 0px"
+    deleteText.textContent = "Are you sure you want to delete this habit? This cannot be undone."
+    habitContainer.appendChild(deleteText)
+    const deleteBtn = document.createElement("button")
+    deleteBtn.setAttribute("class","btn btn-danger")
+    deleteBtn.textContent = "Yes, Delete "
+    deleteBtn.style.marginBottom = "10px"
+    const deleteIcon = document.createElement("i")
+    deleteIcon.setAttribute("class", "bi bi-trash")
+    deleteBtn.appendChild(deleteIcon)
+    deleteBtn.style.width = "50%"
+    deleteIcon.style.pointerEvents= "none";
+    deleteBtn.style.height = "42px"
+    habitContainer.appendChild(deleteBtn)
+    deleteBtn.addEventListener("click", async (e)=>{
+        const accessToken = localStorage.getItem("accessToken")
+        console.log(habit.id)
+        const habitData = {
+            id: habit.id
+        }
+        const options = {   
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json",
+                    "Authorization": accessToken }}
+        try{ 
+            const response = await fetch(`http://localhost:3000/habits/${habit.id}`, options)
+            // const r = await response.json()
+            location.reload()
+        } catch (err) {
+            console.warn(err)
+        }
+    })
 }
 
-module.exports = {
-    displayHabits,
-    createHabitCards,
-    habitFrequencies,
-    updateHabitStatus,
-    makeButtons,
-    checkLeaderboard
-}
+// module.exports = {
+//     displayHabits,
+//     createHabitCards,
+//     habitFrequencies,
+//     updateHabitStatus,
+//     makeButtons,
+//     checkLeaderboard
+// }
 
