@@ -50,20 +50,20 @@ function validatePassword(){
 loginForm.addEventListener("submit", e=>{
     e.preventDefault()
     const formData = {
-        userEmail: e.target.email.value,
+        email: e.target.email.value,
         password: e.target.password.value
     }
-    requestLogin(formData)
+    requestLogin(JSON.stringify(formData))
 })
 
 registerForm.addEventListener("submit", e=>{
     e.preventDefault()
     const formData = {
-        userEmail: e.target.email.value,
+        email: e.target.email.value,
         userName: e.target.username.value,
         password: e.target.password.value
     }
-    requestRegistration(formData)
+    requestRegistration(JSON.stringify(formData))
 })
 
 async function requestLogin(data){
@@ -71,15 +71,17 @@ async function requestLogin(data){
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: data
         }
-        console.log(options.body)
+        // console.log(options.body)
         const r = await fetch(`http://localhost:3000/auth/login`, options)
+        console.log(r)
         const fetchData = await r.json()
+        console.log(fetchData)
         if (fetchData.err){ throw Error(fetchData.err); }
         login(fetchData);
     } catch (err) {
-        console.warn(`Error: ${err}`);
+        console.warn(err);
     }
 }
 
@@ -88,14 +90,14 @@ async function requestRegistration(data) {
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: data
         }
         const r = await fetch(`http://localhost:3000/auth/register`, options)
-        console.log(data)
-        console.log(await r.json())
+        // console.log(r)
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err) }
-        requestLogin(fetchData);
+        // console.log(fetchData)
+        requestLogin(options.body);
     } catch (err) {
         console.warn(err);
     }

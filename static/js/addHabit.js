@@ -58,7 +58,7 @@ async function postHabit(data) {
             headers: { "Content-Type": "application/json" },
             body: {...data, userName: "Initial User"}
         }
-        const r = await fetch(`http://localhost:3000/habits/"initialUser@email.com"`, options);
+        const r = await fetch(`http://localhost:3000/habits/${email}`, options);
         const habitData = await r.json()
         createHabitCards(habitData)
         window.location.href = './home.html'
