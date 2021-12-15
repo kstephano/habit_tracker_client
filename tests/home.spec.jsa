@@ -1,5 +1,5 @@
-// @jest-environment jsdom
- 
+ @jest-environment jsdom
+
 
   const fs = require("fs");
   const path = require("path");
@@ -9,9 +9,4 @@
      test("grid container exists", ()=>{
          expect(document.querySelector(".grid-container")).toBeTruthy()
      })
-     test("Test created cards elements",()=>{
-         
-
-     })
  })
-

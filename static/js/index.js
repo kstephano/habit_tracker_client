@@ -5,14 +5,15 @@ const registerForm = document.querySelector("#register-form")
 
 // Event listeners for login page, to display/hide forms
 function loginListeners(){
-    openLoginForm = document.querySelector("#open-login")
-    registerBtn = document.querySelector("#open-register")
-    backBtn = document.querySelector("#back-btn")
+    openLoginForm = document.querySelector("#open-login");
+    registerBtn = document.querySelector("#open-register");
+    backBtn = document.querySelector("#back-btn");
 
     openLoginForm.addEventListener("click", e=>{
-        showForm(loginForm)})
+        showForm(loginForm)});
+
     registerBtn.addEventListener("click", e=>{
-        showForm(registerForm)})
+        showForm(registerForm)});
 
     function showForm(form){
         form.style.display = "flex";
@@ -48,32 +49,65 @@ function validatePassword(){
 // Handle login form data
 loginForm.addEventListener("submit", e=>{
     e.preventDefault()
-    submitLogin(e, "login")
+    const formData = {
+        userEmail: e.target.email.value,
+        password: e.target.password.value
+    }
+    requestLogin(formData)
 })
 
 registerForm.addEventListener("submit", e=>{
     e.preventDefault()
-    submitLogin(e, "register")
+    const formData = {
+        userEmail: e.target.email.value,
+        userName: e.target.username.value,
+        password: e.target.password.value
+    }
+    requestRegistration(formData)
 })
 
-function submitLogin(e, path){
-    const loginData = {
-        email: e.target.email.value,
-        password: e.target.password.value
-    };
+async function requestLogin(data){
+    try {
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }
+        console.log(options.body)
+        const r = await fetch(`http://localhost:3000/auth/login`, options)
+        const fetchData = await r.json()
+        if (fetchData.err){ throw Error(fetchData.err); }
+        login(fetchData);
+    } catch (err) {
+        console.warn(`Error: ${err}`);
+    }
+}
 
-    const options = {
-        method: "POST",
-        body: JSON.stringify(loginData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-    console.log(loginData)
-    // post to the '/blogs' URL
-    fetch(`http://localhost:3000/${path}`, options)
-        .then((r) => r.json())
-        .then(window.location.href = "home.html")
-        .catch(console.warn);
-    // location.reload();
+async function requestRegistration(data) {
+    try {
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }
+        const r = await fetch(`http://localhost:3000/auth/register`, options)
+        console.log(data)
+        console.log(await r.json())
+        const fetchData = await r.json()
+        if (fetchData.err){ throw Error(fetchData.err) }
+        requestLogin(fetchData);
+    } catch (err) {
+        console.warn(err);
+    }
+}
+
+function login(data){
+    localStorage.setItem('userName', data.userName);
+    localStorage.setItem('userEmail', data.userEmail);
+    window.location.href = './home.html'
+}
+
+module.exports = {
+    loginListeners,
+    validatePassword,
 }

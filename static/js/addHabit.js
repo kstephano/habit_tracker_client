@@ -36,7 +36,6 @@ habitForm.addEventListener("submit", e=>{
     }else{
         console.log("BROKEN")
     }
-
     const habitData = {
         habitName: newHabitName,
         frequency: e.target.frequency.value,
@@ -44,6 +43,26 @@ habitForm.addEventListener("submit", e=>{
         streak: [{ top: 0 }, { current: 0 }],
         lastLog: ""
         }
-
     console.log(habitData)
+    postHabit(habitData)
 })
+
+async function postHabit(data) {
+    const email = "initialUser@email.com"
+    email = email.replace(/\./g, '%2E').replace(/\@/g, '%40')
+    const username = "Initial User"
+    console.log(email)
+    try {
+        const options = {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: {...data, userName: "Initial User"}
+        }
+        const r = await fetch(`http://localhost:3000/habits/"initialUser@email.com"`, options);
+        const habitData = await r.json()
+        createHabitCards(habitData)
+        window.location.href = './home.html'
+    } catch (err) {
+        console.warn(err)
+    }
+}
