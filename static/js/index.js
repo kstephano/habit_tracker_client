@@ -75,11 +75,11 @@ async function requestLogin(data){
         }
         // console.log(options.body)
         const r = await fetch(`http://localhost:3000/auth/login`, options)
-        console.log(r)
         const fetchData = await r.json()
-        console.log(fetchData)
         if (fetchData.err){ throw Error(fetchData.err); }
-        login(fetchData);
+        localStorage.setItem('accessToken', fetchData.accessToken)
+        localStorage.setItem('refreshTokens', fetchData.refreshTokens)
+        login(data);
     } catch (err) {
         console.warn(err);
     }
@@ -93,21 +93,40 @@ async function requestRegistration(data) {
             body: data
         }
         const r = await fetch(`http://localhost:3000/auth/register`, options)
-        // console.log(r)
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err) }
-        // console.log(fetchData)
         requestLogin(options.body);
     } catch (err) {
         console.warn(err);
     }
 }
 
-function login(data){
-    localStorage.setItem('userName', data.userName);
-    localStorage.setItem('userEmail', data.userEmail);
-    window.location.href = './home.html'
+async function login(data){
+    data = JSON.parse(data)
+    const email = data.email.replace(/\./g, '%2E').replace(/\@/g, '%40')
+    try {
+        const response = await fetch(`http://localhost:3000/users/${email}`)
+        const data = await response.json()
+        localStorage.setItem('userName', data.userName)
+        localStorage.setItem('userEmail', email);
+        window.location.href = './home.html'
+    } catch (err) {
+        console.warn(err)
+    }
+    // fetchUsername(email)
+    // localStorage.setItem('userEmail', email);
+    // window.location.href = './home.html'
 }
+
+// async function fetchUsername(email) {
+//     try {
+//         const response = await fetch(`http://localhost:3000/users/${email}`)
+//         const data = await response.json()
+//         localStorage.setItem('userName', data.userName)
+//     } catch (err) {
+//         console.warn(err)
+//     }
+// }
 
 module.exports = {
     loginListeners,

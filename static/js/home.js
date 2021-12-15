@@ -1,55 +1,81 @@
-document.addEventListener("DOMContentLoaded", displayHabits);
+document.addEventListener("DOMContentLoaded", loadHabits);
 
-// async function loadHabits(){
-//     // get all habits
-//     try{
-//         // const email = localStorage.getItem("userEmail")
-//         const email = "initialUser@email.com"
-//         let response = await fetch(`http://localhost:3000/:${email}`);
-//         response = await response.json();
-//         displayHabits(response)
-//     }catch (err) {
-//     console.log(err);
-//     }
-// }
+async function loadHabits(){
+    // get all habits
+    try{
+        const email = localStorage.getItem("userEmail")
+        const accessToken = localStorage.getItem("accessToken")
+        const options = {
+            method: 'GET',
+            headers: { "Content-Type": "application/json",
+                        "Authorization": accessToken }
+        }
+        let response = await fetch(`http://localhost:3000/habits/${email}`, options);
+        response = await response.json();
+        console.log(response)
+        displayHabits(response)
+    }catch (err) {
+    console.log(err);
+    }
+}
 
 // fetch default habit names also?
-const defaultHabits = ["drink water","walk the dog","eat fruit","shower","study","read"]
+const defaultHabits = ["drink water","walk the dog","eat fruit","shower","study","read","run","walk"]
 
-const habits=[
-    {
-    habitName: "Drink Water",
-    frequency: 1,
-    amount: { expected: 3 ,  current: 1 },
-    streak: { top: 5 ,  current: 3 },
-    lastLog: "2021-12-11T11:31:21.988Z"
-    },
-    {
-    habitName: "Brushing Teeth",
-    frequency: 7,
-    amount: { expected: 14 , current: 9 },
-    streak: { top: 101 ,  current: 70 },
-    lastLog: "2021-12-11T11:31:21.988Z"
-    },
-    {
-    habitName: "Walk the Dog",
-    frequency: 7,
-    amount: { expected: 1 , current: 1 },
-    streak: { top: 76 ,  current: 76 },
-    lastLog: "2021-12-11T11:31:21.988Z"
-    },
-]
+// const habits=[
+//     {
+//         id: 0,
+//         userEmail: "initialUser@email.com",
+//         userName: "Initial User",
+//         habitName: "Water",
+//         frequency: 1,
+//         unit: "cups",
+//         expectedAmount: 3,
+//         currentAmount: 0,
+//         topStreak: 5,
+//         currentStreak: 3,
+//         lastLog: "2021-12-11T11:31:21.988Z"
+//     },
+//     {
+//         id: 1,
+//         userEmail: "initialUser@email.com",
+//         userName: "Initial User",
+//         habitName: "Run",
+//         frequency: 7,
+//         unit: "kilometres",
+//         expectedAmount: 10,
+//         currentAmount: 3,
+//         topStreak: 5,
+//         currentStreak: 3,
+//         lastLog: "2021-12-11T11:31:21.988Z"
+//     },
+//     {
+//         id: 2,
+//         userEmail: "initialUser@email.com",
+//         userName: "Initial User",
+//         habitName: "Read",
+//         frequency: 1,
+//         unit: "minutes",
+//         expectedAmount: 30,
+//         currentAmount: 0,
+//         topStreak: 10,
+//         currentStreak: 2,
+//         lastLog: "2021-12-11T11:31:21.988Z"
+//     }
+// ]
 
-function displayHabits(habitsList){
+function displayHabits(habits){
+    console.log(habits)
     const habitGrid = document.querySelector(".grid-container")
     for(let x in habits){
+        // console.log(habits[x])
         const habitContainer = document.createElement("div")
         habitContainer.setAttribute("class","grid-item")
         habitContainer.setAttribute("id",x)
         for(let i = 0 ; i<5 ; i++){
             habitContainer.appendChild(createHabitCards(habits[x])[i])
         }
-        habitContainer.appendChild(makeButtons(x))
+        habitContainer.appendChild(makeButtons(habits[x], x))
         habitContainer.appendChild(createHabitCards(habits[x])[5])
         habitGrid.appendChild(habitContainer)
     }
@@ -61,20 +87,22 @@ function createHabitCards(habit){
         habitTitle.textContent = habit.habitName
 
         const habitTopStreak = document.createElement("h6")
-        habitTopStreak.textContent = `Top Streak: ${habit.streak.top}`
+        habitTopStreak.textContent = `Top Streak: ${habit.topStreak}`
         habitTopStreak.setAttribute("id","habitTopStreakTag")
         const habitCurrentStreak = document.createElement("h6")
-        habitCurrentStreak.textContent = `Current Streak: ${habit.streak.current}`
+        habitCurrentStreak.textContent = `Current Streak: ${habit.currentStreak}`
         habitCurrentStreak.setAttribute("id","habitCurrentStreakTag")
 
         let frequency = habit.frequency
-        const amountExpected = habit.amount.expected
-        habitFrequency = habitFrequencies(frequency, amountExpected)[0]
+        const amountExpected = habit.expectedAmount
+        // console.log(habit.unit)
+        habitFrequency = habitFrequencies(frequency, amountExpected, habit.unit)[0]
 
         const habitStatus = document.createElement("h6")
         
-        const progress = Math.round((habit.amount.current/habit.amount.expected)*100)
-        habitStatus.textContent = `Current Progress: ${progress}% (${habit.amount.current} time(s) in the last ${habitFrequencies(frequency, amountExpected)[1]})`
+        const progress = Math.round((habit.currentAmount/habit.expectedAmount)*100)
+        let unitShown = habit.unit.substring(0,habit.unit.length-1)
+        habitStatus.textContent = `Current Progress: ${progress}% (${habit.currentAmount} ${unitShown}(s) in the last ${habitFrequencies(frequency, amountExpected, habit.unit)[1]})`
 
         const progressBar = document.createElement("div");
         progressBar.textContent = ".";
@@ -93,7 +121,8 @@ function createHabitCards(habit){
         return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar]
 }
 
-function habitFrequencies(frequency, amountExpected){
+function habitFrequencies(frequency, amountExpected, units){
+    let unitShown = units.substring(0,units.length-1)
     const habitFrequency = document.createElement("h6")
     // Check if frequency is a week, fortnight or month
     if(frequency==7){
@@ -110,42 +139,79 @@ function habitFrequencies(frequency, amountExpected){
     }
     // Set text content of habitFrequency html element
     if(amountExpected==frequency){
-        habitFrequency.textContent = `Frequency: Once per day`
+        habitFrequency.textContent = `Frequency: One ${unitShown}(s) per day`
     }
     else if(amountExpected>1 && frequency == 1){
-        habitFrequency.textContent = `Frequency: ${amountExpected} times per day`
+        habitFrequency.textContent = `Frequency: ${amountExpected} ${unitShown}(s) per day`
     }
     else if(amountExpected>1){
-        habitFrequency.textContent = `Frequency: ${amountExpected} times every ${frequencyShown}`
+        habitFrequency.textContent = `Frequency: ${amountExpected} ${unitShown}(s) every ${frequencyShown}`
     }
     
     else if(amountExpected==1){
-        habitFrequency.textContent = `Frequency: Once every ${frequencyShown}`
+        habitFrequency.textContent = `Frequency: One ${unitShown}(s) every ${frequencyShown}`
     }
     return[habitFrequency, frequencyShown]
 }
 
-function updateHabitStatus(e){
+async function updateHabitStatus(e, habit){
     e.preventDefault()
-    // habit index can be used in url when carrying out the put request
-    console.log(`habit index: ${e.target.name}`)
-    console.log(habits[e.target.name].habitName)
-    // put request, where habitName = habits[e.target.name].habitName
+    console.log(`Update with value: ${e.target.number.value}`)
+    console.log(`New Value: ${parseInt(e.target.number.value) + habit.currentAmount}`)
+    console.log(`Habit name: ${habit.habitName}`)
+    const newAmount = parseInt(e.target.number.value) + habit.currentAmount
+    const updateData = {
+        id: habit.id,
+        userEmail: habit.userEmail,
+        currentAmount: newAmount
+    }
+    const options = {
+        method: 'PUT',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData)
+    }
+    try{
+        const response = await fetch(`http://localhost:3000/habits/${habit.userEmail}/${habit.id}`, options)
+        const r = await response.json()
+    } catch (err) {
+        console.warn(err)
+    }
 }
 
-function makeButtons(x){
+function makeButtons(habit, x){
+        console.log(habit)
         const buttonContainer = document.createElement("div")
         buttonContainer.style.display = "flex";
         buttonContainer.style.justifyContent = "space-evenly";
 
+        const updateContainer = document.createElement("form")
+        updateContainer.style.display = "flex";
+        updateContainer.style.justifyContent = "space-evenly";
+        updateContainer.style.width = "40%"
         const habitButton = document.createElement("button")
-        habitButton.textContent = "Log Progress (+1)"
+        habitButton.textContent = "Update"
         habitButton.setAttribute("class","btn btn-success")
+        habitButton.setAttribute("type","submit")
         habitButton.setAttribute("name",x)
-        habitButton.addEventListener("click", e=>{
-            updateHabitStatus(e)
+        habitButton.style.height="42px";
+        updateContainer.appendChild(habitButton)
+
+        const logInput = document.createElement("input");
+        logInput.setAttribute("type","number");
+        logInput.setAttribute("class","form-control mb-3")
+        logInput.setAttribute("name","number")
+        logInput.setAttribute("min","0")
+        logInput.setAttribute("placeholder",habit.unit.toString())
+        logInput.required = true;
+        // logInput.setAttribute("max",habit.expectedAmount.toString())
+        logInput.style.width = "40%";
+        logInput.style.height="42px";
+        updateContainer.appendChild(logInput)
+
+        updateContainer.addEventListener("submit", (e)=>{
+            updateHabitStatus(e, habit)
         })
-        buttonContainer.appendChild(habitButton)
+        buttonContainer.appendChild(updateContainer)
 
         const leaderboardBtn = document.createElement("button")
         leaderboardBtn.textContent = "Leaderboards "
@@ -154,6 +220,7 @@ function makeButtons(x){
         ldbIcon.setAttribute("class", "bi bi-bar-chart")
         leaderboardBtn.appendChild(ldbIcon)
         leaderboardBtn.setAttribute("name",x)
+        leaderboardBtn.style.width = "45%"
         if(defaultHabits.includes(habits[x].habitName.toLowerCase())){
             leaderboardBtn.disabled = false;
         }else{
@@ -162,6 +229,7 @@ function makeButtons(x){
         leaderboardBtn.addEventListener("click", e=>{
             checkLeaderboard(e)
         })
+        leaderboardBtn.style.height="42px";
         buttonContainer.appendChild(leaderboardBtn)
 
         return(buttonContainer)
@@ -178,7 +246,7 @@ function checkLeaderboard(element){
         for(let x = 0 ; x<5 ; x++){
             habitContainer.appendChild(createHabitCards(habits[element.target.name])[x])
         }
-        habitContainer.appendChild(makeButtons(element.target.name))
+        habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name))
         habitContainer.appendChild(createHabitCards(habits[element.target.name])[5])
         closeBtn.innerHTML = "";
     })
