@@ -1,0 +1,4 @@
+[submodule "habit_tracker_client"]
+	path = habit_tracker_client
+	url = https://github.com/kstephano/habit_tracker_client.git
+	branch = main
