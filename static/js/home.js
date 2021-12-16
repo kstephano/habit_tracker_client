@@ -1,32 +1,90 @@
 document.addEventListener("DOMContentLoaded", displayHabits);
 
+initNavbar();
+
+async function initNavbar() {
+    const logoutBtn = document.querySelector("#logout-btn");
+    const addhabitBtn = document.querySelector("#addhabit-btn");
+    logoutBtn.addEventListener("click", logout);
+}   
+
 async function loadHabits(){
     // get all habits
     try{
-        const logoutBtn = document.querySelector("#logout-btn")
-        logoutBtn.addEventListener("click", logout)
-        const email = localStorage.getItem("userEmail")
-        const accessToken = localStorage.getItem("accessToken")
+        const email = localStorage.getItem("userEmail");
+        const accessToken = localStorage.getItem("accessToken");
+        console.log(accessToken);
+
         const options = {
             method: 'GET',
             headers: { "Content-Type": "application/json",
                         "Authorization": accessToken }
         }
         let response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, options);
-        // check for if access token used for fetch is null/invalid
-        if (res.status === 401 || res.status === 403) {
-            
+
+        // check if access token used for fetch is null/invalid
+        if (response.status == 401 || response.status == 403) {
+            const newAccessToken = await requestNewAccessToken();
+            const updatedOptions = {
+                method: 'GET',
+                headers: {
+                    "Content-Type": 'application/json',
+                    "Authorization": newAccessToken
+                }
+            }
+            const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, updatedOptions);
+            const habits = await newResponse.json();
+            console.log("Habits in loadHabits function")
+        } else {
+            habits = await response.json();
+            console.log("HABITS LOADHABITS()")
+            console.log(habits);
+            return habits
         }
-        habits = await response.json();
-        return habits
     }catch (err) {
-    console.log(err);
+        console.log(`Cannot process habits: ${err}`);
+    }
+}
+
+async function processHabits() {
+    const habits = await loadHabits();
+    console.log("habits:")
+    console.log(habits);
+    const processedHabits = [];
+    
+    if (habits.length != 0) {
+        habits.forEach(habit => {
+            if (habit.lastLog != null) {
+                let filtered = habit.lastLog.substring(0,10)
+                let d = new Date()
+                let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
+                let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
+                var diff =  Math.floor(
+                    (Date.parse(currentDate.replace(/-/g,'\/')) 
+                    - Date.parse(filteredDate.replace(/-/g,'\/'))) 
+                    / 86400000);
+                if(diff>parseInt(habit.frequency)){
+                    processedHabits.push({
+                        ...habit,
+                        currentAmount: 0,
+                        currentStreak: 0
+                    });
+                }
+            }  
+            processedHabits.push({...habit});
+        });
+        console.log("return processed:");
+        console.log(processedHabits)
+        return processedHabits;
+    } else{
+        console.log("return not processed:")
+        console.log(habits)
+        return habits
     }
 }
 
 async function displayHabits(){
-    const habits = await loadHabits()
-    console.log(habits)
+    const habits = await processHabits();
     const habitGrid = document.querySelector(".grid-container")
     if(habits.length == 0){
         const noHabitsMessage = document.createElement("h6")
@@ -34,13 +92,16 @@ async function displayHabits(){
         noHabitsMessage.style.marginTop = "20px"
         document.querySelector("#dashboard-message").appendChild(noHabitsMessage)
     }
+
+    console.log(habits);
     for(let x in habits){
-        // console.log(habits[x])
+        // console.log(habits[x].habitName)
         const habitContainer = document.createElement("div")
         habitContainer.setAttribute("class","grid-item")
         habitContainer.setAttribute("id",x)
+        const elements = createHabitCards(habits[x])
         for(let i = 0 ; i<5 ; i++){
-            habitContainer.appendChild(createHabitCards(habits[x])[i])
+            habitContainer.appendChild(elements[i])
         }
         habitContainer.appendChild(makeButtons(habits[x], x))
         habitContainer.appendChild(createHabitCards(habits[x])[5])
@@ -51,7 +112,8 @@ async function displayHabits(){
 function createHabitCards(habit){
         const habitTitle = document.createElement("h3")
         habitTitle.setAttribute("id","habitTitleTag")
-        habitTitle.textContent = habit.habitName
+        const newHabitName = habit.habitName.replace("U+2215","/")
+        habitTitle.textContent = newHabitName
 
         const habitTopStreak = document.createElement("h6")
         habitTopStreak.textContent = `Top Streak: ${habit.topStreak}`
@@ -77,22 +139,22 @@ function createHabitCards(habit){
         progressBar.style.textAlign = "left";
         progressBar.style.backgroundColor = "#32DD53DD";
         progressBar.style.marginTop = "10px";
-
         progressBar.style.width =progress+"%";
         if (progress==100){
+            // habit.currentStreak++
             progressBar.textContent = ":)";
             progressBar.style.textAlign = "right";
             progressBar.style.color = "#000000";
+            updateCurrentAmount(habit)
         }
-
-        return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar, progress]
+    return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar, progress]
 }
 
 function habitFrequencies(frequency, amountExpected, units){
     let unitShown = units.substring(0,units.length-1)
     const habitFrequency = document.createElement("h6")
     // Check if frequency is a week, fortnight or month
-    if(frequency==7){
+    if (frequency==7){
         frequencyShown = "week"
     } else if (frequency == 14){
         frequencyShown = "fortnight"
@@ -100,25 +162,45 @@ function habitFrequencies(frequency, amountExpected, units){
         frequencyShown = "month"
     } else if (frequency == 1){
         frequencyShown = "day"
-    }
-    else{
+    } else{
         frequencyShown = frequency + " days"
     }
     // Set text content of habitFrequency html element
-    if(amountExpected==frequency){
+    if (amountExpected==frequency){
         habitFrequency.textContent = `Frequency: One ${unitShown}(s) per day`
-    }
-    else if(amountExpected>1 && frequency == 1){
+    } else if (amountExpected>1 && frequency == 1){
         habitFrequency.textContent = `Frequency: ${amountExpected} ${unitShown}(s) per day`
-    }
-    else if(amountExpected>1){
+    } else if (amountExpected>1){
         habitFrequency.textContent = `Frequency: ${amountExpected} ${unitShown}(s) every ${frequencyShown}`
-    }
-    
-    else if(amountExpected==1){
+    } else if (amountExpected==1){
         habitFrequency.textContent = `Frequency: One ${unitShown}(s) every ${frequencyShown}`
     }
     return[habitFrequency, frequencyShown]
+}
+
+function updateCurrentAmount(aHabit){
+    let filtered = aHabit.lastLog.substring(0,10)
+    let d = new Date()
+    let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
+    let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
+    var diff =  Math.floor(
+        (Date.parse(currentDate.replace(/-/g,'\/')) 
+        - Date.parse(filteredDate.replace(/-/g,'\/'))) 
+        / 86400000);
+    // console.log(diff)
+    // if(diff>aHabit.frequency && progress != 100){
+    //     aHabit.lastLog = d.toISOString();
+    //     aHabit.currentAmount = 0
+    //     aHabit.currentStreak = 0
+    // } else
+    if(diff<aHabit.frequency){
+        aHabit.currentStreak++
+        console.log("updated streak")
+        if(aHabit.currentStreak == aHabit.topStreak){
+            aHabit.topStreak++
+        }
+    }
+    return(aHabit)
 }
 
 async function updateHabitStatus(e, habit){
@@ -127,10 +209,12 @@ async function updateHabitStatus(e, habit){
     console.log(`New Value: ${parseInt(e.target.number.value) + habit.currentAmount}`)
     console.log(`Habit name: ${habit.habitName}`)
     const newAmount = parseInt(e.target.number.value) + habit.currentAmount
+    let d = new Date()
     const updateData = {
         id: habit.id,
         userEmail: habit.userEmail,
-        currentAmount: newAmount
+        currentAmount: newAmount,
+        lastLog: d
     }
     const accessToken = localStorage.getItem("accessToken")
     const options = {
@@ -140,124 +224,164 @@ async function updateHabitStatus(e, habit){
         body: JSON.stringify(updateData)
     }
     try{
-        const response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options)
-        const r = await response.json()
-        location.reload()
+        let response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options);
+
+        // check for if access token used for fetch is null/invalid
+        if (response.status === 401 || response.status === 403) {
+            const newAccessToken = await requestNewAccessToken();
+            const updatedOptions = {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": 'application/json',
+                    "Authorization": newAccessToken,
+                    body: JSON.stringify(updateData)
+                }
+            }
+            const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, updatedOptions);
+            const data = await newResponse.json();
+            console.log(data); // updated habit object
+            location.reload();
+        } else {
+            const data = await response.json();
+            console.log(data); // updated habit object
+            location.reload();
+        }
     } catch (err) {
-        console.warn(err)
+        console.warn(err);
     }
 }
 
 function makeButtons(habit, x){
-        const buttonContainer = document.createElement("div")
+        const buttonContainer = document.createElement("div");
         buttonContainer.style.display = "flex";
         buttonContainer.style.justifyContent = "space-evenly";
 
-        const updateContainer = document.createElement("form")
+        const updateContainer = document.createElement("form");
         updateContainer.style.display = "flex";
         updateContainer.style.justifyContent = "space-evenly";
-        updateContainer.style.width = "40%"
-        const habitButton = document.createElement("button")
-        habitButton.textContent = "Update"
-        habitButton.setAttribute("class","btn btn-success")
-        habitButton.setAttribute("type","submit")
-        habitButton.setAttribute("name",x)
+        updateContainer.style.width = "40%";
+        const habitButton = document.createElement("button");
+        habitButton.textContent = "Update";
+        habitButton.setAttribute("class","btn btn-success");
+        habitButton.setAttribute("type","submit");
+        habitButton.setAttribute("name",x);
         habitButton.style.height="42px";
         if(createHabitCards(habit)[6]>=100){
-            habitButton.disabled = true
+            habitButton.disabled = true;
         }
-        updateContainer.appendChild(habitButton)
+        updateContainer.appendChild(habitButton);
 
         const logInput = document.createElement("input");
         logInput.setAttribute("type","number");
-        logInput.setAttribute("class","form-control mb-3")
-        logInput.setAttribute("name","number")
-        logInput.setAttribute("min","0")
-        const maxInput = habit.expectedAmount - habit.currentAmount
-        logInput.setAttribute("max",maxInput.toString())
-        logInput.setAttribute("placeholder",habit.unit.toString())
+        logInput.setAttribute("class","form-control mb-3");
+        logInput.setAttribute("name","number");
+        logInput.setAttribute("min","0");
+        const maxInput = habit.expectedAmount - habit.currentAmount;
+        logInput.setAttribute("max",maxInput.toString());
+        logInput.setAttribute("placeholder",habit.unit.toString());
         logInput.required = true;
         // logInput.setAttribute("max",habit.expectedAmount.toString())
         logInput.style.width = "40%";
         logInput.style.height="42px";
-        updateContainer.appendChild(logInput)
+        updateContainer.appendChild(logInput);
 
         updateContainer.addEventListener("submit", (e)=>{
-            updateHabitStatus(e, habit)
-        })
-        buttonContainer.appendChild(updateContainer)
+            updateHabitStatus(e, habit);
+        });
+        buttonContainer.appendChild(updateContainer);
 
-        const leaderboardBtn = document.createElement("button")
-        leaderboardBtn.textContent = "Leaderboards "
-        leaderboardBtn.setAttribute("class","btn btn-warning")
-        const ldbIcon = document.createElement("i")
-        ldbIcon.setAttribute("class", "bi bi-bar-chart")
-        leaderboardBtn.appendChild(ldbIcon)
-        leaderboardBtn.setAttribute("name",x)
-        leaderboardBtn.style.width = "45%"
-        const defaultHabits = ["drink water","walk the dog","eat fruit/veg","shower","study","read","run","walk"]
-        if(defaultHabits.includes(habits[x].habitName.toLowerCase())){
+        const leaderboardBtn = document.createElement("button");
+        leaderboardBtn.textContent = "Leaderboards ";
+        leaderboardBtn.setAttribute("class","btn btn-warning");
+        const ldbIcon = document.createElement("i");
+        ldbIcon.setAttribute("class", "bi bi-bar-chart");
+        leaderboardBtn.appendChild(ldbIcon);
+        leaderboardBtn.setAttribute("name",x);
+        leaderboardBtn.style.width = "45%";
+        const defaultHabits = ["drink water","walk the dog","eat fruitu+2215veg","shower","study","read","run","walk"];
+        if(defaultHabits.includes(habit.habitName.toLowerCase())){
             leaderboardBtn.disabled = false;
         }else{
             leaderboardBtn.disabled = true;
         }
         leaderboardBtn.addEventListener("click", e=>{
-            checkLeaderboard(e, habits[x].habitName, habits[x].frequency, habits[x].expectedAmount, habits[x].unit)
-        })
+            checkLeaderboard(e, habit.habitName, habit.frequency, habit.expectedAmount, habit.unit);
+        });
         leaderboardBtn.style.height="42px";
-        buttonContainer.appendChild(leaderboardBtn)
+        buttonContainer.appendChild(leaderboardBtn);
 
-        const deleteBtn = document.createElement("button")
-        deleteBtn.setAttribute("class","btn btn-danger")
-        const deleteIcon = document.createElement("i")
-        deleteIcon.setAttribute("class", "bi bi-trash")
-        deleteBtn.appendChild(deleteIcon)
-        deleteBtn.setAttribute("name",x)
-        deleteBtn.style.width = "10%"
+        const deleteBtn = document.createElement("button");
+        deleteBtn.setAttribute("class","btn btn-danger");
+        const deleteIcon = document.createElement("i");
+        deleteIcon.setAttribute("class", "bi bi-trash");
+        deleteBtn.appendChild(deleteIcon);
+        deleteBtn.setAttribute("name",x);
+        deleteBtn.style.width = "10%";
         deleteIcon.style.pointerEvents= "none";
-        deleteBtn.style.height = "42px"
+        deleteBtn.style.height = "42px";
         deleteBtn.addEventListener("click", e=>{
-            deleteHabit(e, habits[x])
-        })
-        buttonContainer.appendChild(deleteBtn)
+            deleteHabit(e, habits[x]);
+        });
+        buttonContainer.appendChild(deleteBtn);
 
-        return(buttonContainer)
+        return(buttonContainer);
 }
 
 async function checkLeaderboard(element, habitName, frequency, expectedAmount, unit){
-    element.preventDefault()
-    const habitContainer = document.getElementById(`${element.target.name}`)
+    element.preventDefault();
+    const habitContainer = document.getElementById(`${element.target.name}`);
     habitContainer.innerHTML = "";
-    const closeBtn = document.createElement("button")
-    closeBtn.setAttribute("class","btn-close")
+    const closeBtn = document.createElement("button");
+    closeBtn.setAttribute("class","btn-close");
     closeBtn.addEventListener("click", e=>{
         habitContainer.innerHTML = "";
+        const elements = createHabitCards(habits[element.target.name])
+        console.log("elements")
+        console.log(elements)
         for(let x = 0 ; x<5 ; x++){
-            habitContainer.appendChild(createHabitCards(habits[element.target.name])[x])
+            habitContainer.appendChild(elements[x]);
         }
-        habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name))
-        habitContainer.appendChild(createHabitCards(habits[element.target.name])[5])
+        habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name));
+        habitContainer.appendChild(createHabitCards(habits[element.target.name])[5]);
         closeBtn.innerHTML = "";
     })
     habitContainer.appendChild(closeBtn)
-    habitContainer.appendChild(habitFrequencies(frequency, expectedAmount, unit)[0])
-    habitContainer.appendChild(createHabitCards(habits[element.target.name])[0])
+    habitContainer.appendChild(habitFrequencies(frequency, expectedAmount, unit)[0]);
+    habitContainer.appendChild(createHabitCards(habits[element.target.name])[0]);
 
     try{
-        const email = localStorage.getItem("userEmail")
-        const accessToken = localStorage.getItem("accessToken")
+        const email = localStorage.getItem("userEmail");
+        const accessToken = localStorage.getItem("accessToken");
         const options = {
             method: 'GET',
             headers: { "Content-Type": "application/json",
                         "Authorization": accessToken }}
-        const r = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, options)
-        const leaders = await r.json()
-        const filteredLeaders = leaders.filter(leader => leader.frequency == frequency && leader.unit == unit && leader.expectedAmount == expectedAmount)
-        const leaderboard = createLeaderboardTable(filteredLeaders)
-        habitContainer.appendChild(leaderboard)
-        } catch (err) {
-            console.warn(err)
+        let response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, options);
+
+        // check for if access token used for fetch is null/invalid
+        if (response.status === 401 || response.status === 403) {
+            const newAccessToken = await requestNewAccessToken();
+            const updatedOptions = {
+                method: 'GET',
+                headers: {
+                    "Content-Type": 'application/json',
+                    "Authorization": newAccessToken,
+                }
+            }
+            const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, updatedOptions);
+            const leaders = await newResponse.json()
+            const filteredLeaders = leaders.filter(leader => leader.frequency == frequency && leader.unit == unit && leader.expectedAmount == expectedAmount)
+            const leaderboard = createLeaderboardTable(filteredLeaders)
+            habitContainer.appendChild(leaderboard)
+        } else {
+            const leaders = await response.json()
+            const filteredLeaders = leaders.filter(leader => leader.frequency == frequency && leader.unit == unit && leader.expectedAmount == expectedAmount)
+            const leaderboard = createLeaderboardTable(filteredLeaders)
+            habitContainer.appendChild(leaderboard)
         }
+    } catch (err) {
+        console.warn(err)
+    }
 }
 
 function createLeaderboardTable (data) {
@@ -335,8 +459,22 @@ async function deleteHabit(element, habit){
             headers: { "Content-Type": "application/json",
                     "Authorization": accessToken }}
         try{ 
-            const response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options)
-            // const r = await response.json()
+            let response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options)
+
+            // check for if access token used for fetch is null/invalid
+            if (response.status === 401 || response.status === 403) {
+                const newAccessToken = await requestNewAccessToken();
+                const updatedOptions = {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type": 'application/json',
+                        "Authorization": newAccessToken,
+                    }
+                }
+                const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, updatedOptions);
+                const deletedHabit = newResponse.json();
+                console.log(deletedHabit); // log deleted habit
+            }
             location.reload()
         } catch (err) {
             console.warn(err)
@@ -346,45 +484,53 @@ async function deleteHabit(element, habit){
 
 async function requestNewAccessToken() {
     const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken == null) {
+    const email = localStorage.getItem('userEmail');
 
-    }
     const options = {
         method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: refreshToken })
+    }
+
+    // attempt to fetch a new access token
+    try {
+        // fetch request for new access token
+        const response = await fetch(`https://warm-forest-14168.herokuapp.com/auth/token/${email}`, options);
+        const data = await response.json();
+
+        // check if refreshToken is null or invalid
+        if (response.status === 403 || response.status === 401) {
+            alert("Session expired, please log in");
+            return logout();
+        // check if a new access token has been successfully retrieved    
+        } if (response.status === 200) {
+            console.log(`New access token acquired: ${data.accessToken}`);
+            return data.accessToken;
         }
+    } catch (err) {
+        console.log(`Error requesting new access token: ${err}`);
     }
 }
 
 async function logout() {
+    const userEmail = localStorage.getItem("userEmail");
+    const refreshToken = localStorage.getItem("refreshToken");
 
     const options = {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: {
-            "email": localStorage.getItem("userEmail"),
-            "token": localStorage.getItem("refreshToken")
-        }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: refreshToken }),
     }
-    
-    const response = await fetch("https://warm-forest-14168.herokuapp.com/auth/logout", options);
-    if (response.status == 204) {
-        prompt("User successfully logged out");
+
+    try {
+        const response = await fetch(`https://warm-forest-14168.herokuapp.com/auth/logout/${userEmail}`, options);
+        // check is logout is successful
+        if (response.status == 204) {
+            console.log("user logged out");
+        }
         window.location.href = './index.html';
+    } catch(err){
+        console.warn(err);
     }
 }
-
-
-// module.exports = {
-//     displayHabits,
-//     createHabitCards,
-//     habitFrequencies,
-//     updateHabitStatus,
-//     makeButtons,
-//     checkLeaderboard
-// }
 
