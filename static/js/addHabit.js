@@ -37,27 +37,17 @@ habitForm.addEventListener("submit", e=>{
         console.log("BROKEN")
     }
     const habitData = {
-        // id
-        // email
-        // username
         habitName: newHabitName,
         frequency: e.target.frequency.value,
         unit: e.target.units.value,
         amount: e.target.amount.value,
-        // currentAmount: 0,
-        // topStreak: 0,
-        // currentStreak: 0,
-        // lastLog: ""
     }
-    console.log(habitData)
     postHabit(habitData)
 })
 
 async function postHabit(data) {
     const email = localStorage.getItem('userEmail')
-    console.log(email)
     const username = localStorage.getItem('userName')
-    console.log(username)
     const accessToken = localStorage.getItem('accessToken')
     try {
         const options = {
@@ -69,8 +59,6 @@ async function postHabit(data) {
         console.log(options.body)
         const r = await fetch(`http://localhost:3000/habits/${email}`, options);
         const habitData = await r.json()
-        console.log(habitData)
-        // createHabitCards(habitData)
         window.location.href = './home.html'
     } catch (err) {
         console.warn(err)

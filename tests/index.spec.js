@@ -61,13 +61,4 @@ describe("index.js", ()=>{
         });
 
     })
-
-    describe("Submit Login", ()=>{
-        test("Function Exists", ()=>{
-            expect(script.submitLogin).toBeTruthy()
-        })
-        test("Takes 2 arguments", ()=>{
-            expect(script.submitLogin.length).toBe(2)
-        })
-    })
 })
