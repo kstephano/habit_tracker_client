@@ -188,7 +188,7 @@ function habitFrequencies(frequency, amountExpected, units){
 //         - Date.parse(filteredDate.replace(/-/g,'\/'))) 
 //         / 86400000);
     // console.log(diff)
-    // if(diff>aHabit.frequency && progress != 100){
+    // if(diff>aHabit.frequency){
     //     aHabit.lastLog = d.toISOString();
     //     aHabit.currentAmount = 0
     //     aHabit.currentStreak = 0
@@ -288,7 +288,7 @@ function makeButtons(habit, x){
         logInput.setAttribute("type","number");
         logInput.setAttribute("class","form-control mb-3");
         logInput.setAttribute("name","number");
-        logInput.setAttribute("min","0");
+        logInput.setAttribute("min","1");
         const maxInput = habit.expectedAmount - habit.currentAmount;
         logInput.setAttribute("max",maxInput.toString());
         logInput.setAttribute("placeholder",habit.unit.toString());
@@ -546,3 +546,22 @@ async function logout() {
     }
 }
 
+function isinTime(lastLog){
+    // filter last log to only contain date (no time component)
+    let filtered = lastLog.substring(0,10)
+    let d = new Date()
+    let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
+    
+    let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
+    // get the difference between lastLog and current time
+    var diff =  Math.floor(
+        (Date.parse(currentDate.replace(/-/g,'\/')) 
+        - Date.parse(filteredDate.replace(/-/g,'\/'))) 
+        / 86400000);
+    console.log(diff)
+    
+    if(diff < aHabit.frequency) {
+        return true
+    }
+    return false
+}
