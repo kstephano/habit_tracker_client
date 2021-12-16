@@ -104,7 +104,7 @@ async function displayHabits(){
             habitContainer.appendChild(elements[i])
         }
         habitContainer.appendChild(makeButtons(habits[x], x))
-        habitContainer.appendChild(createHabitCards(habits[x])[5])
+        habitContainer.appendChild(elements[5])
         habitGrid.appendChild(habitContainer)
     }
 }
@@ -145,7 +145,7 @@ function createHabitCards(habit){
             progressBar.textContent = ":)";
             progressBar.style.textAlign = "right";
             progressBar.style.color = "#000000";
-            updateCurrentAmount(habit)
+            // updateCurrentAmount(habit)
         }
     return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar, progress]
 }
@@ -178,30 +178,30 @@ function habitFrequencies(frequency, amountExpected, units){
     return[habitFrequency, frequencyShown]
 }
 
-function updateCurrentAmount(aHabit){
-    let filtered = aHabit.lastLog.substring(0,10)
-    let d = new Date()
-    let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
-    let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
-    var diff =  Math.floor(
-        (Date.parse(currentDate.replace(/-/g,'\/')) 
-        - Date.parse(filteredDate.replace(/-/g,'\/'))) 
-        / 86400000);
+// function updateCurrentAmount(aHabit){
+//     let filtered = aHabit.lastLog.substring(0,10)
+//     let d = new Date()
+//     let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
+//     let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
+//     var diff =  Math.floor(
+//         (Date.parse(currentDate.replace(/-/g,'\/')) 
+//         - Date.parse(filteredDate.replace(/-/g,'\/'))) 
+//         / 86400000);
     // console.log(diff)
     // if(diff>aHabit.frequency && progress != 100){
     //     aHabit.lastLog = d.toISOString();
     //     aHabit.currentAmount = 0
     //     aHabit.currentStreak = 0
     // } else
-    if(diff<aHabit.frequency){
-        aHabit.currentStreak++
-        console.log("updated streak")
-        if(aHabit.currentStreak == aHabit.topStreak){
-            aHabit.topStreak++
-        }
-    }
-    return(aHabit)
-}
+//     if(diff<aHabit.frequency){
+//         aHabit.currentStreak++
+//         console.log("updated streak")
+//         if(aHabit.currentStreak == aHabit.topStreak){
+//             aHabit.topStreak++
+//         }
+//     }
+//     return(aHabit)
+// }
 
 async function updateHabitStatus(e, habit){
     e.preventDefault()
@@ -209,6 +209,7 @@ async function updateHabitStatus(e, habit){
     console.log(`New Value: ${parseInt(e.target.number.value) + habit.currentAmount}`)
     console.log(`Habit name: ${habit.habitName}`)
     const newAmount = parseInt(e.target.number.value) + habit.currentAmount
+    
     let d = new Date()
     const updateData = {
         id: habit.id,
@@ -216,6 +217,18 @@ async function updateHabitStatus(e, habit){
         currentAmount: newAmount,
         lastLog: d
     }
+    // If target has been reached and log is in time to continue the streak
+    if((habit.expectedAmount == newAmount) && isInTime(habit.lastLog)){
+        updateData.currentStreak = habit.currentStreak + 1;
+        // Increment top streak if equal to current streak 
+        if((habit.currentStreak == habit.topStreak) ){
+            updateData.topStreak = habit.topStreak + 1
+        }
+    // If target has been reached but it is not in time to continue the streak
+    } else if (habit.expectedAmount == newAmount) {
+        updateData.currentStreak = 1;
+    }
+    
     const accessToken = localStorage.getItem("accessToken")
     const options = {
         method: 'PUT',
@@ -331,23 +344,21 @@ async function checkLeaderboard(element, habitName, frequency, expectedAmount, u
     element.preventDefault();
     const habitContainer = document.getElementById(`${element.target.name}`);
     habitContainer.innerHTML = "";
+    const elements = createHabitCards(habits[element.target.name])
     const closeBtn = document.createElement("button");
     closeBtn.setAttribute("class","btn-close");
     closeBtn.addEventListener("click", e=>{
         habitContainer.innerHTML = "";
-        const elements = createHabitCards(habits[element.target.name])
-        console.log("elements")
-        console.log(elements)
         for(let x = 0 ; x<5 ; x++){
             habitContainer.appendChild(elements[x]);
         }
         habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name));
-        habitContainer.appendChild(createHabitCards(habits[element.target.name])[5]);
+        habitContainer.appendChild(elements[5]);
         closeBtn.innerHTML = "";
     })
     habitContainer.appendChild(closeBtn)
     habitContainer.appendChild(habitFrequencies(frequency, expectedAmount, unit)[0]);
-    habitContainer.appendChild(createHabitCards(habits[element.target.name])[0]);
+    habitContainer.appendChild(elements[0]);
 
     try{
         const email = localStorage.getItem("userEmail");
@@ -420,18 +431,19 @@ async function deleteHabit(element, habit){
     const habitContainer = document.getElementById(`${element.target.name}`)
     habitContainer.innerHTML = "";
     const closeBtn = document.createElement("button")
+    const elements = createHabitCards(habits[element.target.name])
     closeBtn.setAttribute("class","btn-close")
     closeBtn.addEventListener("click", e=>{
         habitContainer.innerHTML = "";
         for(let x = 0 ; x<5 ; x++){
-            habitContainer.appendChild(createHabitCards(habits[element.target.name])[x])
+            habitContainer.appendChild(elements[x])
         }
         habitContainer.appendChild(makeButtons(habits[element.target.name],element.target.name))
-        habitContainer.appendChild(createHabitCards(habits[element.target.name])[5])
+        habitContainer.appendChild(elements[5])
         closeBtn.innerHTML = "";
     })
     habitContainer.appendChild(closeBtn)
-    habitContainer.appendChild(createHabitCards(habits[element.target.name])[0])
+    habitContainer.appendChild(elements[0])
     
     const deleteText = document.createElement("h6")
     deleteText.style.margin = "10px 0px 10px 0px"
