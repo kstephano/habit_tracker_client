@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", displayHabits);
 async function loadHabits(){
     // get all habits
     try{
+        const logoutBtn = document.querySelector("#logout-btn")
+        logoutBtn.addEventListener("click", logout)
         const email = localStorage.getItem("userEmail")
         const accessToken = localStorage.getItem("accessToken")
         const options = {
@@ -10,7 +12,11 @@ async function loadHabits(){
             headers: { "Content-Type": "application/json",
                         "Authorization": accessToken }
         }
-        let response = await fetch(`http://localhost:3000/habits/${email}`, options);
+        let response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, options);
+        // check for if access token used for fetch is null/invalid
+        if (res.status === 401 || res.status === 403) {
+            
+        }
         habits = await response.json();
         return habits
     }catch (err) {
@@ -134,7 +140,7 @@ async function updateHabitStatus(e, habit){
         body: JSON.stringify(updateData)
     }
     try{
-        const response = await fetch(`http://localhost:3000/habits/${habit.id}`, options)
+        const response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options)
         const r = await response.json()
         location.reload()
     } catch (err) {
@@ -244,7 +250,7 @@ async function checkLeaderboard(element, habitName, frequency, expectedAmount, u
             method: 'GET',
             headers: { "Content-Type": "application/json",
                         "Authorization": accessToken }}
-        const r = await fetch(`http://localhost:3000/habits/leaderboard/${habitName}`, options)
+        const r = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, options)
         const leaders = await r.json()
         const filteredLeaders = leaders.filter(leader => leader.frequency == frequency && leader.unit == unit && leader.expectedAmount == expectedAmount)
         const leaderboard = createLeaderboardTable(filteredLeaders)
@@ -329,7 +335,7 @@ async function deleteHabit(element, habit){
             headers: { "Content-Type": "application/json",
                     "Authorization": accessToken }}
         try{ 
-            const response = await fetch(`http://localhost:3000/habits/${habit.id}`, options)
+            const response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, options)
             // const r = await response.json()
             location.reload()
         } catch (err) {
@@ -337,6 +343,41 @@ async function deleteHabit(element, habit){
         }
     })
 }
+
+async function requestNewAccessToken() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken == null) {
+
+    }
+    const options = {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": 
+        }
+    }
+}
+
+async function logout() {
+
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: {
+            "email": localStorage.getItem("userEmail"),
+            "token": localStorage.getItem("refreshToken")
+        }
+    }
+    
+    const response = await fetch("https://warm-forest-14168.herokuapp.com/auth/logout", options);
+    if (response.status == 204) {
+        prompt("User successfully logged out");
+        window.location.href = './index.html';
+    }
+}
+
 
 // module.exports = {
 //     displayHabits,

@@ -57,7 +57,7 @@ async function postHabit(data) {
             body: JSON.stringify({...data, userName: username})
         }
         console.log(options.body)
-        const r = await fetch(`http://localhost:3000/habits/${email}`, options);
+        const r = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, options);
         const habitData = await r.json()
         window.location.href = './home.html'
     } catch (err) {

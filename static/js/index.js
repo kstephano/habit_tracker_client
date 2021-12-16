@@ -74,11 +74,11 @@ async function requestLogin(data){
             body: data
         }
         // console.log(options.body)
-        const r = await fetch(`http://localhost:3000/auth/login`, options)
+        const r = await fetch(`https://warm-forest-14168.herokuapp.com/auth/login`, options)
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err); }
         localStorage.setItem('accessToken', fetchData.accessToken)
-        localStorage.setItem('refreshTokens', fetchData.refreshTokens)
+        localStorage.setItem('refreshToken', fetchData.refreshToken)
         login(data);
     } catch (err) {
         console.warn(err);
@@ -92,7 +92,7 @@ async function requestRegistration(data) {
             headers: { 'Content-Type': 'application/json' },
             body: data
         }
-        const r = await fetch(`http://localhost:3000/auth/register`, options)
+        const r = await fetch(`https://warm-forest-14168.herokuapp.com/auth/register`, options)
         const fetchData = await r.json()
         if (fetchData.err){ throw Error(fetchData.err) }
         requestLogin(options.body);
@@ -105,7 +105,7 @@ async function login(data){
     data = JSON.parse(data)
     const email = data.email.replace(/\./g, '%2E').replace(/\@/g, '%40')
     try {
-        const response = await fetch(`http://localhost:3000/users/${email}`)
+        const response = await fetch(`https://warm-forest-14168.herokuapp.com/users/${email}`)
         const data = await response.json()
         localStorage.setItem('userName', data.userName)
         localStorage.setItem('userEmail', email);
