@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", loadListeners);
 const habitForm = document.querySelector("#add-habit-form")
 
+initNavbar();
+
+async function initNavbar() {
+    const logoutBtn = document.querySelector("#logout-btn");
+    const addhabitBtn = document.querySelector("#addhabit-btn");
+    logoutBtn.addEventListener("click", logout);
+}   
 
 function loadListeners(){
     const selectExistingBtn = document.querySelector("#default-habit-button")
@@ -58,12 +65,14 @@ async function postHabit(data) {
                         "Authorization": accessToken },
             body: JSON.stringify({...data, userName: username})
         }
-        console.log(options.body)
         const response = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, options);
-
+        if (response.status == 422) {
+            alert(`You already have a habit called: ${data.habitName}`)
+        }
         // check for if access token used for fetch is null/invalid
         if (response.status == 401 || response.status == 403) {
-            const newAccessToken = await requestNewAccessToken();
+            await requestNewAccessToken();
+            const newAccessToken = localStorage.getItem('accessToken');
             const updatedOptions = {
                 method: 'POST',
                 headers: {
@@ -73,8 +82,9 @@ async function postHabit(data) {
                 body: JSON.stringify({...data, userName: username})
             }
             const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, updatedOptions);
-            const habitData = await newResponse.json();
-            console.log(habitData);
+            if (newResponse.status == 422) {
+                alert(`You already have a habit called: ${data.habitName}`);
+            }
             window.location.href = './home.html'
         } else {
             const habitData = await response.json()
@@ -108,7 +118,7 @@ async function requestNewAccessToken() {
         // check if a new access token has been successfully retrieved    
         } if (response.status === 200) {
             console.log(`New access token acquired: ${data.accessToken}`);
-            return data.accessToken;
+            localStorage.setItem('accessToken', data.accessToken);
         }
     } catch (err) {
         console.log(`Error requesting new access token: ${err}`);
