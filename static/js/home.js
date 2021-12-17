@@ -129,19 +129,19 @@ function createHabitCards(habit){
         let unitShown = habit.unit.substring(0,habit.unit.length-1)
         habitStatus.textContent = `Current Progress: ${progress}% (${habit.currentAmount} ${unitShown}(s) in the last ${habitFrequencies(frequency, amountExpected, habit.unit)[1]})`
 
+        // create div for progress bar to exist in
         const progressBar = document.createElement("div");
         progressBar.textContent = ".";
         progressBar.style.color = "#32DD53";
         progressBar.style.textAlign = "left";
         progressBar.style.backgroundColor = "#32DD53DD";
         progressBar.style.marginTop = "10px";
+        // set the width of the div to the current progress of the habit (in %)
         progressBar.style.width =progress+"%";
         if (progress==100){
-            // habit.currentStreak++
-            progressBar.textContent = ":)";
-            progressBar.style.textAlign = "right";
-            progressBar.style.color = "#000000";
-            // updateCurrentAmount(habit)
+            progressBar.textContent = "Task Completed 😀";
+            progressBar.style.textAlign = "center";
+            progressBar.style.color = "#006400";
         }
     return [habitTitle, habitTopStreak, habitCurrentStreak, habitFrequency, habitStatus, progressBar, progress]
 }
@@ -524,7 +524,7 @@ function isInTime(lastLog, frequency){
     const currentDate = new Date();
     const loggedDate = Date.parse(lastLog);
     // calculate the hours between the last log and the current date
-    const differenceInHours = Math.abs(currentDate - loggedDate) / 36e5;
+    const differenceInHours = Math.abs(currentDate - loggedDate) / 36e5; // 36e5 = (60 * 60 * 1000)
     console.log("hrs difference: " + differenceInHours)
     // if the log is in time, return true
     if(differenceInHours < maximumTimeInHours) {
