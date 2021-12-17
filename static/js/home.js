@@ -189,7 +189,7 @@ async function updateHabitStatus(e, habit){
         lastLog: d
     }
     // If target has been reached and log is in time to continue the streak
-    if((habit.expectedAmount == newAmount) && isInTime(habit.lastLog, habit.frequency)){
+    if((habit.expectedAmount == newAmount) && (isInTime(habit.lastLog, habit.frequency) || habit.lastLog === null)){
         updateData.currentStreak = habit.currentStreak + 1;
         // Increment top streak if equal to current streak 
         if((habit.currentStreak == habit.topStreak) ){
