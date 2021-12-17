@@ -24,7 +24,8 @@ async function loadHabits(){
 
         // check if access token used for fetch is null/invalid
         if (response.status == 401 || response.status == 403) {
-            const newAccessToken = await requestNewAccessToken();
+            await requestNewAccessToken();
+            const newAccessToken = localStorage.getItem('accessToken');
             const updatedOptions = {
                 method: 'GET',
                 headers: {
@@ -33,9 +34,12 @@ async function loadHabits(){
                 }
             }
             const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, updatedOptions);
-            return habits = await newResponse.json();
+            habits = await newResponse.json();
+            console.log(habits)
+            return habits
         } else {
             habits = await response.json();
+            console.log(habits)
             return habits
         }
     }catch (err) {
@@ -54,7 +58,6 @@ async function processHabits() {
             if (habit.lastLog != null) {
                 // if habit streak has expired
                 if (!isInTime(habit.lastLog, habit.frequency)) {
-                    console.log("is in time");
                     processedHabits.push({
                         ...habit,
                         currentAmount: 0,
@@ -63,6 +66,8 @@ async function processHabits() {
                 } else {
                     processedHabits.push({...habit});
                 }
+            } else {
+                processedHabits.push({...habit});
             }  
         });
         return processedHabits;
@@ -72,8 +77,11 @@ async function processHabits() {
 }
 
 async function displayHabits(){
+    const userName = localStorage.getItem('userName');
     const habits = await processHabits();
     const habitGrid = document.querySelector(".grid-container")
+    const dashboardMessage = document.querySelector("#dashboard-message")
+    dashboardMessage.textContent = `Welcome to your dashboard ${userName}, here you can log your progress with each habit, and track your current progress.`
     if(habits.length == 0){
         const noHabitsMessage = document.createElement("h6")
         noHabitsMessage.textContent = "No habits to display. Click 'Add Habits' above to create one"
@@ -204,7 +212,8 @@ async function updateHabitStatus(e, habit){
 
         // check for if access token used for fetch is null/invalid
         if (response.status === 401 || response.status === 403) {
-            const newAccessToken = await requestNewAccessToken();
+            await requestNewAccessToken();
+            const newAccessToken = localStorage.getItem('accessToken');
             const updatedOptions = {
                 method: 'PUT',
                 headers: {
@@ -334,7 +343,8 @@ async function checkLeaderboard(element, habitName, frequency, expectedAmount, u
 
         // check for if access token used for fetch is null/invalid
         if (response.status === 401 || response.status === 403) {
-            const newAccessToken = await requestNewAccessToken();
+            await requestNewAccessToken();
+            const newAccessToken = localStorage.getItem('accessToken');
             const updatedOptions = {
                 method: 'GET',
                 headers: {
@@ -435,7 +445,8 @@ async function deleteHabit(element, habit){
 
             // check for if access token used for fetch is null/invalid
             if (response.status === 401 || response.status === 403) {
-                const newAccessToken = await requestNewAccessToken();
+                await requestNewAccessToken();
+                const newAccessToken = localStorage.getItem('accessToken');
                 const updatedOptions = {
                     method: 'DELETE',
                     headers: {
@@ -443,8 +454,9 @@ async function deleteHabit(element, habit){
                         "Authorization": newAccessToken,
                     }
                 }
-                const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/leaderboard/${habitName}`, updatedOptions);
+                const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${habit.id}`, updatedOptions);
                 const deletedHabit = newResponse.json();
+                location.reload();
                 console.log(deletedHabit); // log deleted habit
             }
             location.reload()
@@ -477,7 +489,7 @@ async function requestNewAccessToken() {
         // check if a new access token has been successfully retrieved    
         } if (response.status === 200) {
             console.log(`New access token acquired: ${data.accessToken}`);
-            return data.accessToken;
+            localStorage.setItem('accessToken', data.accessToken);
         }
     } catch (err) {
         console.log(`Error requesting new access token: ${err}`);
