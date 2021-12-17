@@ -33,8 +33,7 @@ async function loadHabits(){
                 }
             }
             const newResponse = await fetch(`https://warm-forest-14168.herokuapp.com/habits/${email}`, updatedOptions);
-            const habits = await newResponse.json();
-            console.log("Habits in loadHabits function")
+            return habits = await newResponse.json();
         } else {
             habits = await response.json();
             return habits
@@ -48,27 +47,23 @@ async function processHabits() {
     const habits = await loadHabits();
     const processedHabits = [];
     
+    // check if habits list is empty
     if (habits.length != 0) {
         habits.forEach(habit => {
+            // check for null habit
             if (habit.lastLog != null) {
-                let filtered = habit.lastLog.substring(0,10)
-                let d = new Date()
-                let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
-                let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
-                var diff =  Math.floor(
-                    (Date.parse(currentDate.replace(/-/g,'\/')) 
-                    - Date.parse(filteredDate.replace(/-/g,'\/'))) 
-                    / 86400000);
-                    console.log(diff);
-                if(diff>parseInt(habit.frequency)){
+                // if habit streak has expired
+                if (!isInTime(habit.lastLog, habit.frequency)) {
+                    console.log("is in time");
                     processedHabits.push({
                         ...habit,
                         currentAmount: 0,
                         currentStreak: 0
                     });
+                } else {
+                    processedHabits.push({...habit});
                 }
             }  
-            processedHabits.push({...habit});
         });
         return processedHabits;
     } else{
@@ -512,20 +507,17 @@ async function logout() {
 }
 
 function isInTime(lastLog, frequency){
-    // filter last log to only contain date (no time component)
-    let filtered = lastLog.substring(0,10)
-    let d = new Date()
-    let filteredDate = filtered.substring(0,4)+"-"+filtered.substring(5,7) +"-"+ filtered.substring(8,10)
-    
-    let currentDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()
-    // get the difference between lastLog and current time
-    var diff =  Math.floor(
-        (Date.parse(currentDate.replace(/-/g,'\/')) 
-        - Date.parse(filteredDate.replace(/-/g,'\/'))) 
-        / 86400000);
-    
-    if(diff < frequency) {
+    const maximumTimeInHours = frequency * 24; // maximum time allowed until streak expires
+
+    const currentDate = new Date();
+    const loggedDate = Date.parse(lastLog);
+    // calculate the hours between the last log and the current date
+    const differenceInHours = Math.abs(currentDate - loggedDate) / 36e5;
+    console.log("hrs difference: " + differenceInHours)
+    // if the log is in time, return true
+    if(differenceInHours < maximumTimeInHours) {
         return true
+    } else {
+        return false
     }
-    return false
 }
